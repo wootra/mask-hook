@@ -45,6 +45,7 @@ function SsnScreen() {
       placeholder="___-__-____"
       setIsNumberVisible={setIsNumberVisible}
       storedValue={storedValue}
+      testIdPrefix="ssn"
       title="SSN screen"
     />
   );
@@ -87,6 +88,7 @@ function EinScreen() {
       placeholder="__-_______"
       setIsNumberVisible={setIsNumberVisible}
       storedValue={storedValue}
+      testIdPrefix="ein"
       title="EIN screen"
     />
   );

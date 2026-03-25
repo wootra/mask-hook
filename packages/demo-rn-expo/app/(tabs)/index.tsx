@@ -40,6 +40,7 @@ export default function SsnScreen() {
       placeholder="___-__-____"
       setIsNumberVisible={setIsNumberVisible}
       storedValue={storedValue}
+      testIdPrefix="ssn"
       title="SSN screen"
     />
   );

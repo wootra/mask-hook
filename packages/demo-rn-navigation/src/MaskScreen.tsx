@@ -1,6 +1,7 @@
-import { Keyboard, Pressable, StyleSheet, Text, TextInput, TouchableWithoutFeedback, View } from 'react-native';
+import { Keyboard, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 type MaskScreenProps = {
+  testIdPrefix: string;
   title: string;
   description: string;
   placeholder: string;
@@ -17,6 +18,7 @@ type MaskScreenProps = {
 };
 
 export function MaskScreen({
+  testIdPrefix,
   title,
   description,
   placeholder,
@@ -32,51 +34,52 @@ export function MaskScreen({
   handleInputBlurred,
 }: MaskScreenProps) {
   return (
-    <TouchableWithoutFeedback accessible={false} onPress={Keyboard.dismiss}>
-      <View style={styles.screen}>
-        <View style={styles.card}>
-          <Text style={styles.eyebrow}>demo-rn-navigation</Text>
-          <Text style={styles.title}>{title}</Text>
-          <Text style={styles.description}>{description}</Text>
-          <TextInput
-            keyboardType="number-pad"
-            onBlur={handleInputBlurred}
-            onChangeText={onChangeText}
-            onFocus={handleInputFocused}
-            placeholder={placeholder}
-            style={styles.input}
-            value={displayedValue}
-          />
-          <Pressable
-            disabled={!canEyeIconVisible}
-            onPress={() => setIsNumberVisible(!isNumberVisible)}
-            style={[styles.button, !canEyeIconVisible && styles.buttonDisabled]}
-          >
-            <Text style={styles.buttonText}>{isNumberVisible ? 'Hide digits' : 'Show digits'}</Text>
-          </Pressable>
-          <View style={styles.statRow}>
-            <View style={styles.statCard}>
-              <Text style={styles.statLabel}>Stored value</Text>
-              <Text style={styles.statValue}>{storedValue || 'empty'}</Text>
-            </View>
-            <View style={styles.statCard}>
-              <Text style={styles.statLabel}>Digits</Text>
-              <Text style={styles.statValue}>{digitCount}/9</Text>
-            </View>
+    <View style={styles.screen}>
+      <Pressable onPress={Keyboard.dismiss} style={styles.dismissOverlay} />
+      <View style={styles.card}>
+        <Text style={styles.eyebrow}>demo-rn-navigation</Text>
+        <Text style={styles.title}>{title}</Text>
+        <Text style={styles.description}>{description}</Text>
+        <TextInput
+          keyboardType="number-pad"
+          onBlur={handleInputBlurred}
+          onChangeText={onChangeText}
+          onFocus={handleInputFocused}
+          placeholder={placeholder}
+          style={styles.input}
+          testID={`${testIdPrefix}-mask-input`}
+          value={displayedValue}
+        />
+        <Pressable
+          disabled={!canEyeIconVisible}
+          onPress={() => setIsNumberVisible(!isNumberVisible)}
+          style={[styles.button, !canEyeIconVisible && styles.buttonDisabled]}
+          testID={`${testIdPrefix}-toggle-digits-btn`}
+        >
+          <Text style={styles.buttonText}>{isNumberVisible ? 'Hide digits' : 'Show digits'}</Text>
+        </Pressable>
+        <View style={styles.statRow}>
+          <View style={styles.statCard}>
+            <Text style={styles.statLabel}>Stored value</Text>
+            <Text style={styles.statValue}>{storedValue || 'empty'}</Text>
           </View>
-          <View style={styles.statRow}>
-            <View style={styles.statCard}>
-              <Text style={styles.statLabel}>Visibility</Text>
-              <Text style={styles.statValue}>{isNumberVisible ? 'Visible' : 'Masked'}</Text>
-            </View>
-            <View style={styles.statCard}>
-              <Text style={styles.statLabel}>Dirty state</Text>
-              <Text style={styles.statValue}>{isDirty ? 'Modified' : 'Initial value'}</Text>
-            </View>
+          <View style={styles.statCard}>
+            <Text style={styles.statLabel}>Digits</Text>
+            <Text style={styles.statValue}>{digitCount}/9</Text>
+          </View>
+        </View>
+        <View style={styles.statRow}>
+          <View style={styles.statCard}>
+            <Text style={styles.statLabel}>Visibility</Text>
+            <Text style={styles.statValue}>{isNumberVisible ? 'Visible' : 'Masked'}</Text>
+          </View>
+          <View style={styles.statCard}>
+            <Text style={styles.statLabel}>Dirty state</Text>
+            <Text style={styles.statValue}>{isDirty ? 'Modified' : 'Initial value'}</Text>
           </View>
         </View>
       </View>
-    </TouchableWithoutFeedback>
+    </View>
   );
 }
 
@@ -84,13 +87,18 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: '#eef4f7',
+    position: 'relative',
     padding: 20,
+  },
+  dismissOverlay: {
+    ...StyleSheet.absoluteFillObject,
   },
   card: {
     marginTop: 24,
     borderRadius: 24,
     backgroundColor: '#ffffff',
     padding: 20,
+    zIndex: 1,
     gap: 14,
   },
   eyebrow: {

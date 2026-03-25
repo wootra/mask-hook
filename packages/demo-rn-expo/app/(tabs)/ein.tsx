@@ -40,6 +40,7 @@ export default function EinScreen() {
       placeholder="__-_______"
       setIsNumberVisible={setIsNumberVisible}
       storedValue={storedValue}
+      testIdPrefix="ein"
       title="EIN screen"
     />
   );
