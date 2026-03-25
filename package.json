@@ -1,0 +1,13 @@
+{
+  "name": "mask-hook-monorepo",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=packages/sample-app",
+    "test": "npm run test --workspace=packages/mask-hook",
+    "test:watch": "npm run test:watch --workspace=packages/mask-hook",
+    "build:sample": "npm run build --workspace=packages/sample-app"
+  }
+}
