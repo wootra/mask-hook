@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useFocusEffect } from 'expo-router';
-import { SsnFormats, useMask } from 'mask-hook';
+import { SsnFormats, useMask } from '@shjeon0730/mask-hook';
 import { MaskScreen } from '../../src/MaskScreen';
 
 export default function SsnScreen() {

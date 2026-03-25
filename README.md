@@ -10,7 +10,7 @@ It works in React and React Native and is designed for controlled input flows wh
 ## Installation
 
 ```bash
-npm install mask-hook
+npm install @shjeon0730/mask-hook
 ```
 
 Peer dependency:
@@ -20,7 +20,7 @@ Peer dependency:
 
 ```tsx
 import { useEffect, useState } from 'react';
-import { SsnFormats, useMask } from 'mask-hook';
+import { SsnFormats, useMask } from '@shjeon0730/mask-hook';
 
 export function SsnField() {
   const [storedValue, setStoredValue] = useState('6789');
@@ -92,8 +92,8 @@ useFocusEffect(initialize);
 ## Exports
 
 ```ts
-import { useMask, SsnFormats, EinFormats } from 'mask-hook';
-import type { MaskInfo, UseMaskParams } from 'mask-hook';
+import { useMask, SsnFormats, EinFormats } from '@shjeon0730/mask-hook';
+import type { MaskInfo, UseMaskParams } from '@shjeon0730/mask-hook';
 ```
 
 ## API
@@ -155,7 +155,6 @@ This repository includes multiple demos under packages:
 - packages/demo-web: web demo (React + Vite)
 - packages/demo-rn-expo: Expo Router demo
 - packages/demo-rn-navigation: React Navigation demo
-- packages/sample-app: additional sample workspace
 
 Root scripts:
 
@@ -167,6 +166,9 @@ npm run dev:web
 npm run dev:rn-expo
 npm run dev:rn-navigation
 npm run build:web
+npm run tag -- patch
+npm run tag -- minor
+npm run tag -- major
 ```
 
 Library-only scripts:
@@ -176,6 +178,34 @@ npm run test --workspace=packages/mask-hook
 npm run test:watch --workspace=packages/mask-hook
 npm run typecheck --workspace=packages/mask-hook
 ```
+
+## Release Flow
+
+Create and publish a release with one command:
+
+```bash
+npm run tag -- patch
+```
+
+Supported bump types:
+
+- patch
+- minor
+- major
+
+What the command does:
+
+- bumps the version in packages/mask-hook/package.json
+- updates the root package-lock.json workspace entry
+- creates a git commit
+- creates a matching git tag such as v0.1.1
+- pushes the commit and tag to origin
+
+The GitHub Actions publish workflow only deploys when:
+
+- the pushed tag matches the library version exactly
+- the version does not already exist on npm
+- tests and type checks pass
 
 ## License
 

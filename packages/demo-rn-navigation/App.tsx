@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { NavigationContainer, useFocusEffect } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { enableScreens } from 'react-native-screens';
-import { EinFormats, SsnFormats, useMask } from 'mask-hook';
+import { EinFormats, SsnFormats, useMask } from '@shjeon0730/mask-hook';
 import { MaskScreen } from './src/MaskScreen';
 
 const Tab = createBottomTabNavigator();

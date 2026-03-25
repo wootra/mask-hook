@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { ChangeEvent } from 'react';
-import { EinFormats, SsnFormats, useMask } from 'mask-hook';
-import type { MaskInfo } from 'mask-hook';
+import { EinFormats, SsnFormats, useMask } from '@shjeon0730/mask-hook';
+import type { MaskInfo } from '@shjeon0730/mask-hook';
 
 type TabKey = 'ssn' | 'ein';
 

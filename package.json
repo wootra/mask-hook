@@ -9,9 +9,32 @@
     "dev:web": "npm run dev --workspace=packages/demo-web",
     "dev:rn-expo": "npm run start --workspace=packages/demo-rn-expo",
     "dev:rn-navigation": "npm run start --workspace=packages/demo-rn-navigation",
+    "lint": "npm run lint --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspace=packages/mask-hook && npx tsc --noEmit -p packages/demo-web/tsconfig.json && npx tsc --noEmit -p packages/demo-rn-expo/tsconfig.json && npx tsc --noEmit -p packages/demo-rn-navigation/tsconfig.json",
+    "test:e2e": "npm run test:e2e:list && npm run test:e2e:web && npm run test:e2e:expo-web",
+    "test:e2e:list": "playwright test --list",
+    "test:e2e:web": "E2E_TARGET=web playwright test --project=demo-web",
+    "test:e2e:expo-router-web": "E2E_TARGET=expo playwright test --project=expo-router-web",
+    "test:e2e:expo-navigation-web": "E2E_TARGET=expo playwright test --project=expo-navigation-web",
+    "test:e2e:expo-web": "E2E_TARGET=expo playwright test --project=expo-router-web --project=expo-navigation-web",
+    "test:e2e:ui:web": "E2E_TARGET=web playwright test --project=demo-web --ui",
+    "test:e2e:ui:expo": "E2E_TARGET=expo playwright test --project=expo-router-web --project=expo-navigation-web --ui",
+    "test:e2e:ui": "playwright test --ui",
+    "test:unit": "npm run test --workspace=packages/mask-hook",
+    "check:precommit": "npm run lint && npm run typecheck",
+    "check:prepush": "npm run build:demos && npm run test:unit && npm run test:e2e",
+    "hooks:install": "git config core.hooksPath .githooks && chmod +x .githooks/pre-commit .githooks/pre-push",
+    "tag": "node scripts/tag-release.mjs",
     "test": "npm run test --workspace=packages/mask-hook",
     "test:watch": "npm run test:watch --workspace=packages/mask-hook",
-    "build:web": "npm run build --workspace=packages/demo-web",
-    "build:sample": "npm run build --workspace=packages/demo-web"
+    "build:mask-hook": "npm run build --workspace=packages/mask-hook",
+    "build:demo-web": "npm run build --workspace=packages/demo-web",
+    "build:demo-rn-expo": "npm run build --workspace=packages/demo-rn-expo",
+    "build:demo-rn-navigation": "npm run build --workspace=packages/demo-rn-navigation",
+    "build:demos": "npm run build:demo-web && npm run build:demo-rn-expo && npm run build:demo-rn-navigation",
+    "build:web": "npm run build:demo-web"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.58.2"
   }
 }

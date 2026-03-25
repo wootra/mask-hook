@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useFocusEffect } from 'expo-router';
-import { EinFormats, useMask } from 'mask-hook';
+import { EinFormats, useMask } from '@shjeon0730/mask-hook';
 import { MaskScreen } from '../../src/MaskScreen';
 
 export default function EinScreen() {

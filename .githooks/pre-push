@@ -1,0 +1,5 @@
+#!/usr/bin/env sh
+set -e
+
+printf "\n[pre-push] Running build + unit + e2e...\n"
+npm run check:prepush
