@@ -48,11 +48,11 @@ function DemoPage({ title, description, placeholder, seedValue, maskInfo }: Demo
     <section className="panel">
       <div className="panel-header">
         <div>
-          <p className="eyebrow">Legacy web sample</p>
+          <p className="eyebrow">Focused page initialization</p>
           <h2>{title}</h2>
         </div>
         <button
-          className="ghost-button"
+          className="ghost-button green-button"
           type="button"
           onClick={() => setIsNumberVisible(!isNumberVisible)}
           disabled={!canEyeIconVisible}
@@ -104,9 +104,9 @@ export default function App() {
     <main className="app-shell">
       <section className="hero-card">
         <p className="eyebrow">mask-hook</p>
-        <h1>sample-app</h1>
+        <h1>demo-web</h1>
         <p className="hero-copy">
-          This legacy sample now mirrors the same page-level initialize behavior as the dedicated demo-web package.
+          Each tab mounts its page on selection, and that page immediately calls initialize so the masked default state is restored when the page loads.
         </p>
       </section>
 
@@ -129,18 +129,20 @@ export default function App() {
 
       {activeTab === 'ssn' ? (
         <DemoPage
-          description="This sample page restores its masked SSN seed whenever the tab is selected."
+            key="ssn"
+          description="This page seeds a masked SSN and restores it whenever the tab becomes active."
           maskInfo={SsnFormats}
           placeholder="___-__-____"
-          seedValue="123-45-6789"
+          seedValue="6789"
           title="SSN Demo"
         />
       ) : (
         <DemoPage
-          description="This sample page uses the same initialize-on-focus pattern for EIN values."
+            key="ein"
+          description="This page uses the EIN format and the same initialize-on-focus pattern."
           maskInfo={EinFormats}
           placeholder="__-_______"
-          seedValue="12-3456789"
+          seedValue="6789"
           title="EIN Demo"
         />
       )}

@@ -1,134 +1,83 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from "vitest";
 import {
-  stripNonDigits,
-  formatEIN,
-  formatSSN,
-  maskEIN,
-  maskSSN,
-  TOTAL_DIGITS,
-} from '../src/formatters';
+  convertToFormatted,
+  fillNumberOnFormat,
+  getValueFromInput,
+  isOnlyNumber,
+} from "../src/formatters";
+describe("formatters", () => {
+  describe("isOnlyNumber", () => {
+    it("returns true for digit-only strings", () => {
+      expect(isOnlyNumber("123456789")).toBe(true);
+      expect(isOnlyNumber("0")).toBe(true);
+    });
+    it("returns false for non-digit strings", () => {
+      expect(isOnlyNumber("123-45-6789")).toBe(false);
+      expect(isOnlyNumber("abc")).toBe(false);
+      expect(isOnlyNumber("")).toBe(false);
+    });
+  });
 
-describe('stripNonDigits', () => {
-  it('removes dashes', () => {
-    expect(stripNonDigits('12-3456789')).toBe('123456789');
+  describe("convertToFormatted", () => {
+    it("formats SSN correctly", () => {
+      expect(convertToFormatted("123456789", "999–99–9999")).toBe(
+        "123–45–6789",
+      );
+    });
+    it("formats EIN correctly", () => {
+      expect(convertToFormatted("123456789", "99–9999999")).toBe("12–3456789");
+    });
+    it("formats partial input", () => {
+      expect(convertToFormatted("123", "999–99–9999")).toBe("123");
+      expect(convertToFormatted("12345", "999–99–9999")).toBe("123–45");
+    });
+    it("handles empty input", () => {
+      expect(convertToFormatted("", "999–99–9999")).toBe("");
+    });
+    it("handles bullet format for masking", () => {
+      expect(convertToFormatted("123456789", "•••–••–9999")).toBe(
+        "•••–••–6789",
+      );
+    });
   });
-  it('removes spaces', () => {
-    expect(stripNonDigits('123 45 6789')).toBe('123456789');
-  });
-  it('removes all non-digit chars', () => {
-    expect(stripNonDigits('abc-123')).toBe('123');
-  });
-  it('returns empty string for empty input', () => {
-    expect(stripNonDigits('')).toBe('');
-  });
-  it('returns digits unchanged', () => {
-    expect(stripNonDigits('123456789')).toBe('123456789');
-  });
-});
 
-describe('TOTAL_DIGITS', () => {
-  it('is 9', () => {
-    expect(TOTAL_DIGITS).toBe(9);
+  describe("fillNumberOnFormat", () => {
+    it("fills last digits on format", () => {
+      expect(fillNumberOnFormat("XXX–XX–XX99", "1234")).toBe("XXX–XX–XX34");
+    });
+    it("fills with slice from the end", () => {
+      expect(fillNumberOnFormat("XXX–XX–XX99", "123456")).toBe("XXX–XX–XX56");
+    });
+    it("handles single digit", () => {
+      expect(fillNumberOnFormat("XXX–XX–XX99", "1")).toBe("XXX–XX–XX1");
+    });
+    it("returns empty for empty input", () => {
+      expect(fillNumberOnFormat("XXX–XX–XX99", "")).toBe("");
+    });
+    it("strips non-digits from numberValue", () => {
+      expect(fillNumberOnFormat("99–9999999", "12-34-56789")).toBe(
+        "12–3456789",
+      );
+    });
   });
-});
 
-describe('formatEIN', () => {
-  it('formats 0 digits', () => {
-    expect(formatEIN('')).toBe('');
-  });
-  it('formats 1 digit', () => {
-    expect(formatEIN('1')).toBe('1');
-  });
-  it('formats 2 digits', () => {
-    expect(formatEIN('12')).toBe('12');
-  });
-  it('formats 3 digits with dash', () => {
-    expect(formatEIN('123')).toBe('12-3');
-  });
-  it('formats 9 digits (complete EIN)', () => {
-    expect(formatEIN('123456789')).toBe('12-3456789');
-  });
-  it('truncates beyond 9 digits', () => {
-    expect(formatEIN('12345678901')).toBe('12-3456789');
-  });
-  it('works with star chars (for masking)', () => {
-    expect(formatEIN('*'.repeat(9))).toBe('**-*******');
-  });
-});
-
-describe('formatSSN', () => {
-  it('formats 0 digits', () => {
-    expect(formatSSN('')).toBe('');
-  });
-  it('formats 1 digit', () => {
-    expect(formatSSN('1')).toBe('1');
-  });
-  it('formats 3 digits', () => {
-    expect(formatSSN('123')).toBe('123');
-  });
-  it('formats 4 digits with first dash', () => {
-    expect(formatSSN('1234')).toBe('123-4');
-  });
-  it('formats 5 digits', () => {
-    expect(formatSSN('12345')).toBe('123-45');
-  });
-  it('formats 6 digits with second dash', () => {
-    expect(formatSSN('123456')).toBe('123-45-6');
-  });
-  it('formats 9 digits (complete SSN)', () => {
-    expect(formatSSN('123456789')).toBe('123-45-6789');
-  });
-  it('truncates beyond 9 digits', () => {
-    expect(formatSSN('12345678901')).toBe('123-45-6789');
-  });
-  it('works with star chars (for masking)', () => {
-    expect(formatSSN('*'.repeat(9))).toBe('***-**-****');
-  });
-});
-
-describe('maskEIN', () => {
-  it('returns empty string for empty input', () => {
-    expect(maskEIN('')).toBe('');
-  });
-  it('masks partial entry (1 digit)', () => {
-    expect(maskEIN('1')).toBe('*');
-  });
-  it('masks partial entry (3 digits)', () => {
-    expect(maskEIN('123')).toBe('**-*');
-  });
-  it('shows last 4 digits for complete EIN', () => {
-    expect(maskEIN('123456789')).toBe('**-***6789');
-  });
-  it('masks the first 5 digits', () => {
-    const masked = maskEIN('123456789');
-    expect(masked.startsWith('**-***')).toBe(true);
-  });
-  it('does not expose first 5 digits', () => {
-    const masked = maskEIN('987654321');
-    expect(masked).toBe('**-***4321');
-  });
-});
-
-describe('maskSSN', () => {
-  it('returns empty string for empty input', () => {
-    expect(maskSSN('')).toBe('');
-  });
-  it('masks partial entry (2 digits)', () => {
-    expect(maskSSN('12')).toBe('**');
-  });
-  it('masks partial entry (4 digits)', () => {
-    expect(maskSSN('1234')).toBe('***-*');
-  });
-  it('shows last 4 digits for complete SSN', () => {
-    expect(maskSSN('123456789')).toBe('***-**-6789');
-  });
-  it('does not expose first 5 digits', () => {
-    const masked = maskSSN('987654321');
-    expect(masked).toBe('***-**-4321');
-  });
-  it('last 4 matches actual digits', () => {
-    const digits = '111223333';
-    const masked = maskSSN(digits);
-    expect(masked.endsWith('3333')).toBe(true);
+  describe("getValueFromInput", () => {
+    it("extracts numbers from formatted input", () => {
+      expect(getValueFromInput("123–45–6789", "", 9)).toBe("123456789");
+    });
+    it("preserves previous value for non-numeric input", () => {
+      expect(getValueFromInput("12–X–6789", "123456789", 9)).toBe("1236789");
+    });
+    it("handles deletion (shorter length)", () => {
+      expect(getValueFromInput("123–45–67", "123456789", 9)).toBe("1234567");
+    });
+    it("respects max length", () => {
+      expect(getValueFromInput("123456789", "12345", 6)).toBe("123456");
+    });
+    it("handles masked input with asterisks", () => {
+      expect(getValueFromInput("***–**–6789", "123456789", 9)).toBe(
+        "123456789",
+      );
+    });
   });
 });

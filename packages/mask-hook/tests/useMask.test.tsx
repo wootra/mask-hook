@@ -1,178 +1,157 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useMask } from '../src/useMask';
+import { SsnFormats, EinFormats } from '../src/patterns';
 
 describe('useMask – SSN', () => {
-  it('initializes with empty value', () => {
-    const { result } = renderHook(() => useMask({ type: 'ssn' }));
-    expect(result.current.value).toBe('');
-    expect(result.current.formattedValue).toBe('');
-    expect(result.current.maskedValue).toBe('');
-    expect(result.current.isComplete).toBe(false);
-    expect(result.current.isMasked).toBe(false);
-  });
-
-  it('initializes with provided digits', () => {
+  it('initializes with empty state', () => {
     const { result } = renderHook(() =>
-      useMask({ type: 'ssn', initialValue: '123456789' })
+      useMask({
+        maskInfo: SsnFormats,
+        defaultMaskedValue: '',
+        unmaskedValue: '',
+      })
     );
-    expect(result.current.value).toBe('123456789');
-    expect(result.current.formattedValue).toBe('123-45-6789');
-    expect(result.current.isComplete).toBe(true);
+    expect(result.current.displayedValue).toBe('');
+    expect(result.current.isDirty).toBe(false);
+    expect(result.current.isNumberVisible).toBe(false);
   });
 
-  it('initializes with formatted SSN string', () => {
+  it('initializes with default masked value', () => {
     const { result } = renderHook(() =>
-      useMask({ type: 'ssn', initialValue: '123-45-6789' })
-    );
-    expect(result.current.value).toBe('123456789');
-    expect(result.current.formattedValue).toBe('123-45-6789');
-  });
-
-  it('updates value via onChange', () => {
-    const { result } = renderHook(() => useMask({ type: 'ssn' }));
-    act(() => {
-      result.current.onChange('123456789');
-    });
-    expect(result.current.value).toBe('123456789');
-    expect(result.current.formattedValue).toBe('123-45-6789');
-  });
-
-  it('strips non-digits in onChange', () => {
-    const { result } = renderHook(() => useMask({ type: 'ssn' }));
-    act(() => {
-      result.current.onChange('123-45-6789');
-    });
-    expect(result.current.value).toBe('123456789');
-  });
-
-  it('clamps input to 9 digits', () => {
-    const { result } = renderHook(() => useMask({ type: 'ssn' }));
-    act(() => {
-      result.current.onChange('1234567890');
-    });
-    expect(result.current.value).toBe('123456789');
-  });
-
-  it('starts unmasked by default', () => {
-    const { result } = renderHook(() =>
-      useMask({ type: 'ssn', initialValue: '123456789' })
-    );
-    expect(result.current.isMasked).toBe(false);
-    expect(result.current.displayValue).toBe('123-45-6789');
-  });
-
-  it('starts masked when defaultMasked=true', () => {
-    const { result } = renderHook(() =>
-      useMask({ type: 'ssn', initialValue: '123456789', defaultMasked: true })
-    );
-    expect(result.current.isMasked).toBe(true);
-    expect(result.current.displayValue).toBe('***-**-6789');
-  });
-
-  it('toggleMask switches between masked and unmasked', () => {
-    const { result } = renderHook(() =>
-      useMask({ type: 'ssn', initialValue: '123456789' })
+      useMask({
+        maskInfo: SsnFormats,
+        defaultMaskedValue: '123456789',
+        unmaskedValue: '',
+      })
     );
     act(() => {
-      result.current.toggleMask();
+      result.current.initialize();
     });
-    expect(result.current.isMasked).toBe(true);
-    expect(result.current.displayValue).toBe('***-**-6789');
-
-    act(() => {
-      result.current.toggleMask();
-    });
-    expect(result.current.isMasked).toBe(false);
-    expect(result.current.displayValue).toBe('123-45-6789');
+    expect(result.current.displayedValue).toBe('•••–••–6789');
   });
 
-  it('setMasked sets masked state explicitly', () => {
+  it('handles input change', () => {
+    const onChange = vi.fn();
     const { result } = renderHook(() =>
-      useMask({ type: 'ssn', initialValue: '123456789' })
+      useMask({
+        maskInfo: SsnFormats,
+        defaultMaskedValue: '',
+        unmaskedValue: '',
+        onChange,
+      })
     );
     act(() => {
-      result.current.setMasked(true);
+      result.current.onChangeText('123456789');
     });
-    expect(result.current.isMasked).toBe(true);
-
-    act(() => {
-      result.current.setMasked(false);
-    });
-    expect(result.current.isMasked).toBe(false);
+    expect(result.current.displayedValue).toBe('•••–••–6789');
+    expect(onChange).toHaveBeenCalledWith('123–45–6789');
   });
 
-  it('maskedValue is not empty for partial entry', () => {
-    const { result } = renderHook(() => useMask({ type: 'ssn' }));
+  it('toggles number visibility', () => {
+    const { result } = renderHook(() =>
+      useMask({
+        maskInfo: SsnFormats,
+        defaultMaskedValue: '123456789',
+        unmaskedValue: '',
+      })
+    );
+    expect(result.current.isNumberVisible).toBe(false);
     act(() => {
-      result.current.onChange('123');
+      result.current.setIsNumberVisible(true);
     });
-    expect(result.current.maskedValue).toBe('***');
-    expect(result.current.isComplete).toBe(false);
+    expect(result.current.isNumberVisible).toBe(true);
+  });
+
+  it('marks as dirty on input', () => {
+    const { result } = renderHook(() =>
+      useMask({
+        maskInfo: SsnFormats,
+        defaultMaskedValue: '',
+        unmaskedValue: '',
+      })
+    );
+    expect(result.current.isDirty).toBe(false);
+    act(() => {
+      result.current.onChangeText('123');
+    });
+    expect(result.current.isDirty).toBe(true);
+  });
+
+  it('triggers onBlur callback', () => {
+    const onBlur = vi.fn();
+    const { result } = renderHook(() =>
+      useMask({
+        maskInfo: SsnFormats,
+        defaultMaskedValue: '',
+        unmaskedValue: '',
+        onBlur,
+      })
+    );
+    act(() => {
+      result.current.onChangeText('123456789');
+    });
+    act(() => {
+      result.current.handleInputBlurred();
+    });
+    expect(onBlur).toHaveBeenCalled();
+  });
+
+  it('shows eye icon when complete', () => {
+    const { result } = renderHook(() =>
+      useMask({
+        maskInfo: SsnFormats,
+        defaultMaskedValue: '123456789',
+        unmaskedValue: '123-45-6789',
+      })
+    );
+    expect(result.current.canEyeIconVisible).toBe(true);
   });
 });
 
 describe('useMask – EIN', () => {
-  it('initializes with empty value', () => {
-    const { result } = renderHook(() => useMask({ type: 'ein' }));
-    expect(result.current.value).toBe('');
-    expect(result.current.formattedValue).toBe('');
-    expect(result.current.isComplete).toBe(false);
-  });
-
-  it('formats complete EIN', () => {
+  it('formats EIN correctly', () => {
     const { result } = renderHook(() =>
-      useMask({ type: 'ein', initialValue: '123456789' })
+      useMask({
+        maskInfo: EinFormats,
+        defaultMaskedValue: '',
+        unmaskedValue: '',
+      })
     );
-    expect(result.current.formattedValue).toBe('12-3456789');
-    expect(result.current.isComplete).toBe(true);
+    act(() => {
+      result.current.onChangeText('123456789');
+    });
+    expect(result.current.displayedValue).toBe('••–•••6789');
   });
 
-  it('initializes with formatted EIN string', () => {
+  it('masks EIN correctly', () => {
     const { result } = renderHook(() =>
-      useMask({ type: 'ein', initialValue: '12-3456789' })
+      useMask({
+        maskInfo: EinFormats,
+        defaultMaskedValue: '123456789',
+        unmaskedValue: '',
+      })
     );
-    expect(result.current.value).toBe('123456789');
-    expect(result.current.formattedValue).toBe('12-3456789');
+    act(() => {
+      result.current.initialize();
+    });
+    act(() => {
+      result.current.setIsNumberVisible(false);
+    });
+    expect(result.current.displayedValue).toBe('••–•••6789');
   });
 
-  it('masks complete EIN', () => {
+  it('handles partial input', () => {
     const { result } = renderHook(() =>
-      useMask({ type: 'ein', initialValue: '123456789', defaultMasked: true })
+      useMask({
+        maskInfo: EinFormats,
+        defaultMaskedValue: '',
+        unmaskedValue: '',
+      })
     );
-    expect(result.current.maskedValue).toBe('**-***6789');
-    expect(result.current.displayValue).toBe('**-***6789');
-  });
-
-  it('updates value via onChange', () => {
-    const { result } = renderHook(() => useMask({ type: 'ein' }));
     act(() => {
-      result.current.onChange('12-3456789');
+      result.current.onChangeText('123');
     });
-    expect(result.current.value).toBe('123456789');
-    expect(result.current.formattedValue).toBe('12-3456789');
-  });
-
-  it('maskedValue for partial EIN', () => {
-    const { result } = renderHook(() => useMask({ type: 'ein' }));
-    act(() => {
-      result.current.onChange('12');
-    });
-    expect(result.current.maskedValue).toBe('**');
-    act(() => {
-      result.current.onChange('123');
-    });
-    expect(result.current.maskedValue).toBe('**-*');
-  });
-
-  it('toggleMask works for EIN', () => {
-    const { result } = renderHook(() =>
-      useMask({ type: 'ein', initialValue: '123456789' })
-    );
-    expect(result.current.displayValue).toBe('12-3456789');
-    act(() => {
-      result.current.toggleMask();
-    });
-    expect(result.current.displayValue).toBe('**-***6789');
+    expect(result.current.displayedValue).toBe('••–3');
   });
 });

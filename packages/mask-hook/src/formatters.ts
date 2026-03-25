@@ -1,60 +1,117 @@
-/** Total digit count for both EIN and SSN */
-export const TOTAL_DIGITS = 9;
+import { dashPattern, nonNumberPattern, numberPatternForChar } from "./constants";
 
-/** Remove all non-digit characters from a string */
-export function stripNonDigits(value: string): string {
-  return value.replace(/\D/g, '');
-}
+export const convertToFormatted = (value: string, format: string) => {
+    const retCharArr = [] as string[];
+    let fi = 0; // format index
+
+    const validFormatMax = format.replaceAll(dashPattern, '').length;
+
+    let valueArr = value.replaceAll(nonNumberPattern, '').split('');
+    if (valueArr.length > validFormatMax) {
+        valueArr = valueArr.slice(0, validFormatMax);
+    }
+    const formatArr = format.split('');
+    const isDash = (char?: string) => char && dashPattern.test(char);
+    const isNumber = (char: string) => numberPatternForChar.test(char);
+
+    for (let vi = 0; vi < valueArr.length; ) {
+        const formatChar = formatArr[fi];
+        if (!formatChar) {
+            break; // no more format chars
+        }
+        if (isDash(formatChar)) {
+            retCharArr.push(formatChar);
+            fi++;
+            // do it again
+            continue;
+        } else if (isNumber(formatChar)) {
+            retCharArr.push(valueArr[vi]);
+            fi++;
+            vi++;
+            continue;
+        }
+        // if it is bullet,
+        retCharArr.push(formatChar); // bullet can be anything.
+        vi++;
+        fi++;
+    }
+    if (isDash(value.at(-1))) {
+        if (retCharArr.length === format.length) return retCharArr.join('');
+        return retCharArr.join('') + (value.at(-1) ?? '');
+    }
+
+    const lastChar = valueArr.at(-1);
+    if (retCharArr.length > 0) retCharArr.pop();
+    if (value.length > 0) {
+        return retCharArr.join('') + (lastChar ?? '');
+    }
+    return '';
+};
+
+export const isOnlyNumber = (value: string) => {
+    const regex = /^[\d]+$/;
+    return regex.test(value);
+};
 
 /**
- * Format a digit string as EIN: XX-XXXXXXX
- * Accepts any string of up to 9 characters (typically digits or '*' for masking).
+ * ex> fillNumberOnFormat('XXX-XX-XX99', '1234') => 'XXX-XX-XX34'
+ * ex> fillNumberOnFormat('XXX-XX-XX99', '123456') => 'XXX-XX-XX56'
+ * ex> fillNumberOnFormat('XXX-XX-XX99', '1') => 'XXX-XX-XX1'
+ * ex> fillNumberOnFormat('XXX-XX-XX99', '') => ''
+ * @param format ex> XXX-XX-XX99
+ * @param numberValue ex> 1234
+ * @returns based on the format's number part, pick numberValue and fill up.
  */
-export function formatEIN(chars: string): string {
-  const c = chars.slice(0, TOTAL_DIGITS);
-  if (c.length <= 2) return c;
-  return `${c.slice(0, 2)}-${c.slice(2)}`;
+export const fillNumberOnFormat = (format:string, numberValue: string) => {
+  const numberOnlyValue = numberValue.replaceAll(nonNumberPattern, '');
+  if(!numberOnlyValue) return '';
+  const numberReversed = numberOnlyValue.split('').reverse();
+  return format.split('').reverse().reduce(({arr, numIdx}, char) => {
+    const isCharNumber = numberPatternForChar.test(char);
+    if(isCharNumber && numberReversed[numIdx]){
+      arr.push(numberReversed[numIdx]);
+      numIdx++;
+    }else if(isCharNumber) {
+      arr.push(''); // the number is not ready
+    }else{
+      arr.push(char);
+    }
+    return {arr, numIdx};
+  }, {arr: [] as string[], numIdx: 0}).arr.reverse().join('');
 }
 
-/**
- * Format a digit string as SSN: XXX-XX-XXXX
- * Accepts any string of up to 9 characters (typically digits or '*' for masking).
- */
-export function formatSSN(chars: string): string {
-  const c = chars.slice(0, TOTAL_DIGITS);
-  if (c.length <= 3) return c;
-  if (c.length <= 5) return `${c.slice(0, 3)}-${c.slice(3)}`;
-  return `${c.slice(0, 3)}-${c.slice(3, 5)}-${c.slice(5)}`;
-}
+/** 
 
-/**
- * Produce a masked EIN string.
- * - Complete (9 digits): shows "**-***XXXX" where XXXX = last 4 digits
- * - Partial: all entered digits are replaced with '*'
- */
-export function maskEIN(digits: string): string {
-  const d = digits.slice(0, TOTAL_DIGITS);
-  if (d.length === 0) return '';
-  if (d.length === TOTAL_DIGITS) {
-    // Last 4 visible: positions 5-8 (0-indexed)
-    return `**-***${d.slice(5)}`;
-  }
-  // Partial entry: mask all digits
-  return formatEIN('*'.repeat(d.length));
-}
+Merge formatted & masked characters into previous raw value. it returns only number value.
 
-/**
- * Produce a masked SSN string.
- * - Complete (9 digits): shows "***-**-XXXX" where XXXX = last 4 digits
- * - Partial: all entered digits are replaced with '*'
- */
-export function maskSSN(digits: string): string {
-  const d = digits.slice(0, TOTAL_DIGITS);
-  if (d.length === 0) return '';
-  if (d.length === TOTAL_DIGITS) {
-    // Last 4 visible: positions 5-8 (0-indexed), which is the final group
-    return `***-**-${d.slice(5)}`;
-  }
-  // Partial entry: mask all digits
-  return formatSSN('*'.repeat(d.length));
-}
+when value is shorter than previous, assume this is deletion, so the length is adjusted.
+
+when value is longer than previous, assume this is addition, but inputValue cannot guarantee the value is numbers. so reference previousValue which is only numbers.
+
+examples: 
+
+getValueFromInput('12–3', '123456789', 9) => '123'
+
+getValueFromInput('**-**5', '1234', 9) => '12345'
+
+getValueFromInput('98–765', '9876', 9) => '98765'
+
+getValueFromInput('**–**', '98765', 9) => '9876'
+*/
+export const getValueFromInput = (inputValue: string, previousValue: string, maxLen: number) => {
+    const inputValueArr = inputValue.replaceAll(dashPattern, '').split('');
+    const previousValueArr = Array.from(previousValue.split(''));
+    const nextValueArr = new Array(maxLen).fill('');
+
+    for (let i = 0; i < maxLen; i++) {
+        if (!inputValueArr[i]) {
+            nextValueArr[i] = '';
+        } else if (!isOnlyNumber(inputValueArr[i])) {
+            nextValueArr[i] = previousValueArr[i] ?? '';
+        } else {
+            nextValueArr[i] = inputValueArr[i];
+        }
+    }
+    return nextValueArr.join('');
+};
+

@@ -1,0 +1,10 @@
+{
+  "expo": {
+    "name": "demo-rn-expo",
+    "slug": "demo-rn-expo",
+    "scheme": "demo-rn-expo",
+    "experiments": {
+      "autolinkingModuleResolution": true
+    }
+  }
+}

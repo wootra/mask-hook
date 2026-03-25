@@ -5,9 +5,13 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "npm run dev --workspace=packages/sample-app",
+    "dev": "npm run dev --workspace=packages/demo-web",
+    "dev:web": "npm run dev --workspace=packages/demo-web",
+    "dev:rn-expo": "npm run start --workspace=packages/demo-rn-expo",
+    "dev:rn-navigation": "npm run start --workspace=packages/demo-rn-navigation",
     "test": "npm run test --workspace=packages/mask-hook",
     "test:watch": "npm run test:watch --workspace=packages/mask-hook",
-    "build:sample": "npm run build --workspace=packages/sample-app"
+    "build:web": "npm run build --workspace=packages/demo-web",
+    "build:sample": "npm run build --workspace=packages/demo-web"
   }
 }

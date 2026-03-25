@@ -1,10 +1,3 @@
 export { useMask } from './useMask';
-export type { UseMaskOptions, UseMaskResult, MaskType } from './types';
-export {
-  formatEIN,
-  formatSSN,
-  maskEIN,
-  maskSSN,
-  stripNonDigits,
-  TOTAL_DIGITS,
-} from './formatters';
+export type { MaskInfo, UseMaskParams } from './types';
+export { EinFormats, SsnFormats } from './patterns';
