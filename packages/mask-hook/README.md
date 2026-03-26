@@ -1,6 +1,9 @@
 # @shjeon0730/mask-hook
 
-A React hook for formatting and masking 9-digit identifiers such as SSN and EIN — works seamlessly on **web** and **mobile** (React Native / Expo).
+When handling masking, it usually start with very small logic, and it would work. But the more the complexity is added to support multiple different format of masking, the logic easily go to inconsistent and unstable mutations. 
+This hook includes smooth handling logic to handle masking patterns supporting *Any* pattern.
+
+`@shjeon0730/mask-hook` is a React hook for general-purpose numeric formatting and masking — works seamlessly on **web** and **mobile** (React Native / Expo).
 
 > **Cross-platform:** one hook, zero platform-specific code. Drop it into a React web app or a React Native / Expo project and it behaves identically.
 
@@ -9,6 +12,8 @@ Designed for controlled input flows where you need:
 - Masked and visible display modes (toggle eye icon pattern)
 - Stable digit parsing while typing and deleting
 - Focus-based re-initialization for tab navigation scenarios
+- Custom patterns for any digit length (not limited to SSN/EIN)
+- Even though partial value is given, this hook will make it pretty following the given format. 
 
 ## Demo
 
@@ -50,9 +55,7 @@ export function SsnField() {
     onValueChanged: setStoredValue,
   });
 
-  useEffect(() => {
-    initialize();
-  }, [initialize]);
+  useEffect(initialize, [initialize]);
 
   return (
     <>
@@ -99,9 +102,8 @@ export function SsnField({ value, onChange }) {
     onValueChanged: onChange,
   });
 
-  useEffect(() => {
-    initialize();
-  }, [initialize]);
+  // if unsure re-mounting(i.e. react-navigation screens), use useFocusEffect(initialize)
+  useEffect(initialize, [initialize]);
 
   return (
     <>
@@ -173,6 +175,8 @@ useFocusEffect(initialize);
 
 ### Built-in formats
 
+The package includes SSN and EIN presets for convenience, but you can provide your own `MaskInfo` for any numeric format. 
+
 | Export | `maskedFormat` | `visibleFormat` |
 |--------|---------------|-----------------|
 | `SsnFormats` | `•••–••–9999` | `999–99–9999` |
@@ -190,6 +194,7 @@ const MyFormat: MaskInfo = {
   visibleFormat: '99999999',  // 9 = visible digit
 };
 ```
+> **Note**: the number part can be any number. `***-**-0000` is also a valid format
 
 ## Types
 
