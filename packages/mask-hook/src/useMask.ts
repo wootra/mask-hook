@@ -14,7 +14,6 @@ export const useMask = ({
   unmaskedValue,
   onChange,
   onBlur,
-  onEyeClickedToUpdateRealValue,
   onValueChanged,
 }: UseMaskParams) => {
   const [displayedValue, setDisplayedValue] = useState("");
@@ -38,10 +37,9 @@ export const useMask = ({
   const canEyeIconVisible = useMemo(() => {
     return (
       unmaskedValue.replaceAll(/\D/g, "").length === maxLen ||
-      isDirty ||
-      !!onEyeClickedToUpdateRealValue
+      isDirty
     );
-  }, [unmaskedValue, maxLen, isDirty, onEyeClickedToUpdateRealValue]);
+  }, [unmaskedValue, maxLen, isDirty]);
 
   const onChangeText = useCallback(
     (text: string) => {

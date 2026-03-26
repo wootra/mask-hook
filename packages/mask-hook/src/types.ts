@@ -10,5 +10,4 @@ export type UseMaskParams = {
   onChange?: (changedValueUnmasked: string) => void;
   onBlur?: () => void;
   onValueChanged?: (formattedValue: string) => void;
-  onEyeClickedToUpdateRealValue?: () => void;
 };

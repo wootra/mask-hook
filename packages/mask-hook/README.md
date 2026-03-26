@@ -1,12 +1,19 @@
 # @shjeon0730/mask-hook
 
-A React hook for formatting and masking 9-digit identifiers such as SSN and EIN.
+A React hook for formatting and masking 9-digit identifiers such as SSN and EIN — works seamlessly on **web** and **mobile** (React Native / Expo).
 
-Works in both **React** and **React Native**. Designed for controlled input flows where you need:
+> **Cross-platform:** one hook, zero platform-specific code. Drop it into a React web app or a React Native / Expo project and it behaves identically.
+
+Designed for controlled input flows where you need:
 
 - Masked and visible display modes (toggle eye icon pattern)
 - Stable digit parsing while typing and deleting
 - Focus-based re-initialization for tab navigation scenarios
+
+## Demo
+
+![mask-hook demo](https://raw.githubusercontent.com/wootra/mask-hook/main/packages/mask-hook/demo.gif)
+
 
 ## Installation
 
@@ -117,8 +124,7 @@ export function SsnField({ value, onChange }) {
 ```
 
 ### Tab Navigation (Expo Router / React Navigation)
-
-When using tab navigation, screens often stay mounted. Call `initialize` each time the screen gets focus so the field resets to its default presentation.
+When using navigation, screens often stay mounted. Call `initialize` each time the screen gets focus so the field resets to its default presentation.
 
 **Expo Router:**
 
@@ -150,7 +156,6 @@ useFocusEffect(initialize);
 | `onChange` | `(value: string) => void` | | Called on user edits with the formatted visible value. |
 | `onBlur` | `() => void` | | Called on blur after the user has modified the input. |
 | `onValueChanged` | `(value: string) => void` | | Called on user edits; useful for syncing parent state. |
-| `onEyeClickedToUpdateRealValue` | `() => void` | | Optional hook to force eye icon visibility behavior. |
 
 #### Return value
 
