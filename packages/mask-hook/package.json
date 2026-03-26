@@ -1,6 +1,6 @@
 {
   "name": "@shjeon0730/mask-hook",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "EIN/SSN masking React hook – works with React and React Native",
   "keywords": [
     "react",
