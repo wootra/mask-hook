@@ -31,8 +31,8 @@
     "build:demo-web": "npm run build --workspace=packages/demo-web",
     "build:demo-rn-expo": "npm run build --workspace=packages/demo-rn-expo",
     "build:demo-rn-navigation": "npm run build --workspace=packages/demo-rn-navigation",
-    "build:demos": "npm run build:demo-web && npm run build:demo-rn-expo && npm run build:demo-rn-navigation",
-    "build:web": "npm run build:demo-web"
+    "build:demos": "npm run build:mask-hook && npm run build:demo-web && npm run build:demo-rn-expo && npm run build:demo-rn-navigation",
+    "build:web": "npm run build:mask-hook && npm run build:demo-web"
   },
   "devDependencies": {
     "@playwright/test": "^1.58.2"

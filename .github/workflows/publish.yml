@@ -52,6 +52,9 @@ jobs:
       - name: Run tests
         run: npm test --workspace=packages/mask-hook
 
+      - name: Build package
+        run: npm run build --workspace=packages/mask-hook
+
       - name: Publish to npm
         run: npm publish --workspace=packages/mask-hook --provenance
         env:
