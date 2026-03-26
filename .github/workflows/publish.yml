@@ -20,7 +20,7 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '24'
           registry-url: 'https://registry.npmjs.org'
           cache: 'npm'
 
@@ -30,8 +30,7 @@ jobs:
       - name: Read package metadata
         id: package
         run: |
-          echo "name=$(node -p \"require('./packages/mask-hook/package.json').name\")" >> "$GITHUB_OUTPUT"
-          echo "version=$(node -p \"require('./packages/mask-hook/package.json').version\")" >> "$GITHUB_OUTPUT"
+          node scripts/write-package-metadata-output.mjs
 
       - name: Verify tag matches package version
         run: |
